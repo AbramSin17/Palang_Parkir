@@ -1,0 +1,75 @@
+// Eazytronic.com - Modified: 2 sensor version
+#include <Servo.h>
+Servo s1;
+
+// Sensor 1 - depan gerbang (deteksi mobil masuk)
+const int trigPin1 = 7;
+const int echoPin1 = 6;
+
+// Sensor 2 - belakang gerbang (deteksi mobil sudah lewat)
+const int trigPin2 = 12;
+const int echoPin2 = 11;
+
+long duration1, duration2;
+int distanceCm1, distanceCm2;
+
+bool palangTerbuka = false;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  pinMode(trigPin1, OUTPUT);
+  pinMode(echoPin1, INPUT);
+
+  pinMode(trigPin2, OUTPUT);
+  pinMode(echoPin2, INPUT);
+
+  s1.attach(5);
+  s1.write(90); 
+}
+
+long bacaJarak(int trigPin, int echoPin)
+{
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  long jarak = duration * 0.034 / 2;
+  return jarak;
+}
+
+void loop()
+{
+  distanceCm1 = bacaJarak(trigPin1, echoPin1);
+  delay(50);
+  distanceCm2 = bacaJarak(trigPin2, echoPin2);
+  delay(50);
+
+  Serial.print("Sensor Depan: ");
+  Serial.print(distanceCm1);
+  Serial.print(" cm | Sensor Belakang: ");
+  Serial.print(distanceCm2);
+  Serial.println(" cm");
+
+  // Logika (mengikuti threshold & arah servo terbaru kamu):
+  if (distanceCm1 > 0 && distanceCm1 < 10 && !palangTerbuka)
+  {
+    // ada mobil dekat sensor depan -> buka palang
+    s1.write(0);
+    palangTerbuka = true;
+    Serial.println("Palang terbuka");
+  }
+
+  if (distanceCm2 > 0 && distanceCm2 < 10 && palangTerbuka)
+  {
+    // mobil sudah kedeteksi dekat sensor belakang -> tutup lagi
+    delay(1000);
+    s1.write(90);
+    palangTerbuka = false;
+    Serial.println("Palang tertutup");
+  }
+}

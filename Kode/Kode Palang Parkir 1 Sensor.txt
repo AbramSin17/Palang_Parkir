@@ -1,4 +1,3 @@
-// Eazytronic.com
 #include <Servo.h>
 Servo s1;
 const int trigPin = 12; 
