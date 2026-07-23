@@ -1,4 +1,3 @@
-// Eazytronic.com - Modified: 2 sensor version
 #include <Servo.h>
 Servo s1;
 
