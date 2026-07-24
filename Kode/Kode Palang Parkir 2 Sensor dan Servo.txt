@@ -1,0 +1,82 @@
+// Eazytronic.com - Modified: 2 sensor + 2 servo version
+#include <Servo.h>
+Servo servoMasuk;
+Servo servoKeluar;
+
+// Sensor Masuk
+const int trigMasuk = 12;
+const int echoMasuk = 11;
+
+// Sensor Keluar
+const int trigKeluar = 8;
+const int echoKeluar = 4;
+
+long durasiMasuk, durasiKeluar;
+int jarakMasuk, jarakKeluar;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  pinMode(trigMasuk, OUTPUT);
+  pinMode(echoMasuk, INPUT);
+
+  pinMode(trigKeluar, OUTPUT);
+  pinMode(echoKeluar, INPUT);
+
+  servoMasuk.attach(5);
+  servoKeluar.attach(3);
+
+  servoMasuk.write(90);   // posisi awal tertutup
+  servoKeluar.write(90);  // posisi awal tertutup
+}
+
+long bacaJarak(int trigPin, int echoPin)
+{
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  return duration * 0.034 / 2;
+}
+
+void loop()
+{
+  jarakMasuk = bacaJarak(trigMasuk, echoMasuk);
+  delay(50);
+  jarakKeluar = bacaJarak(trigKeluar, echoKeluar);
+  delay(50);
+
+  Serial.print("Sensor Masuk: ");
+  Serial.print(jarakMasuk);
+  Serial.print(" cm | Sensor Keluar: ");
+  Serial.print(jarakKeluar);
+  Serial.println(" cm");
+
+  // Palang Masuk
+  if (jarakMasuk > 0 && jarakMasuk < 8)
+  {
+    servoMasuk.write(0);   // terbuka
+    delay(1000);
+  }
+  else
+  {
+    servoMasuk.write(90);  // tertutup
+    delay(10);
+  }
+
+  // Palang Keluar
+  if (jarakKeluar > 0 && jarakKeluar < 8)
+  {
+    servoKeluar.write(0);  // terbuka
+    delay(1000);
+  }
+  else
+  {
+    servoKeluar.write(90); // tertutup
+    delay(10);
+  }
+}
